@@ -39,6 +39,17 @@ public class KnowBe4ApiWrapper : IKnowBe4ApiWrapper
     }
 
     /// <summary>
+    /// Get the account info for the current account
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IEnumerable<AccountRiskScoreHistory>> GetAccountRiskScoreHistory(bool isFull)
+    {
+        var endpoint = $"account/risk_score_history?full={isFull}";
+        var accountRiskScoreHistory = await ExecuteApiCall<IEnumerable<AccountRiskScoreHistory>>(endpoint, "GetAccountRiskScoreHistory error");
+        return accountRiskScoreHistory;
+    }
+
+    /// <summary>
     /// Get all users for the current account
     /// </summary>
     /// <returns></returns>

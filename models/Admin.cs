@@ -1,5 +1,4 @@
-﻿
-public class Admin
+﻿public class Admin
 {
     public int id { get; set; }
     public string first_name { get; set; }
