@@ -1,0 +1,42 @@
+# Use the base image for ASP.NET 6.0 on Linux
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+# Build Image
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["knowbe4_api/knowbe4_api.csproj", "knowbe4_api/"]
+RUN dotnet restore "knowbe4_api/knowbe4_api.csproj"
+COPY . .
+WORKDIR "/src/knowbe4_api"
+RUN dotnet build "knowbe4_api.csproj" -c Release -o /app/build
+
+# Publish Image
+FROM build AS publish
+RUN dotnet publish "knowbe4_api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Final Image
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Install OpenSSL for Linux
+RUN apt-get update && apt-get install -y openssl
+
+# Add your SSL certificate
+WORKDIR /app
+
+# Copy all .crt files from the local working directory to the container's working directory
+COPY ./certificates/*.crt ./
+
+# Install each .crt certificate
+RUN for cert in $(ls *.crt); do \
+    openssl x509 -inform der -in $cert -out ${cert%.*}.pem; \
+    mv $cert /usr/local/share/ca-certificates/${cert%.*}.crt; \
+    done && \
+    update-ca-certificates
+
+# Entry Point
+ENTRYPOINT ["dotnet", "knowbe4_api.dll"]
