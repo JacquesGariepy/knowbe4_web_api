@@ -28,6 +28,21 @@ public class KnowBe4Controller : ControllerBase
         }
     }
 
+    [HttpGet("account-risk")]
+    public async Task<IActionResult> GetAccountRiskScoreHistory([FromQuery] bool full = false)
+    {
+        try
+        {
+            var accountRiskScoreHistory = await _apiWrapper.GetAccountRiskScoreHistory(full);
+            return Ok(accountRiskScoreHistory);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error getting account info");
+            return StatusCode(500);
+        }
+    }
+
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
